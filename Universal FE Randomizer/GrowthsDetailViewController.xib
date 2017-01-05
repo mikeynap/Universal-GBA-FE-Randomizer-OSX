@@ -1,9 +1,11 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="8191" systemVersion="14F27" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="11762" systemVersion="16C67" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="8191"/>
+        <deployment identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="11762"/>
         <capability name="Constraints with non-1.0 multipliers" minToolsVersion="5.1"/>
         <capability name="box content view" minToolsVersion="7.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="GrowthsDetailViewController" customModule="Universal_FE_Randomizer" customModuleProvider="target">
@@ -36,7 +38,7 @@
                     </connections>
                 </button>
                 <button translatesAutoresizingMaskIntoConstraints="NO" id="eUv-gL-UGx">
-                    <rect key="frame" x="187" y="235" width="108" height="18"/>
+                    <rect key="frame" x="187" y="235" width="107" height="18"/>
                     <buttonCell key="cell" type="radio" title="Redistribution" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="7w2-Tc-Lsr">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                         <font key="font" metaFont="system"/>
@@ -63,7 +65,7 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <box title="Parameters" borderType="line" translatesAutoresizingMaskIntoConstraints="NO" id="O3d-1I-Pci">
+                <box borderType="line" title="Parameters" translatesAutoresizingMaskIntoConstraints="NO" id="O3d-1I-Pci">
                     <rect key="frame" x="17" y="16" width="446" height="180"/>
                     <view key="contentView" id="Jvj-9b-0D2">
                         <rect key="frame" x="1" y="1" width="444" height="164"/>
@@ -79,7 +81,7 @@
                                 <rect key="frame" x="283" y="60" width="100" height="44"/>
                             </customView>
                             <button translatesAutoresizingMaskIntoConstraints="NO" id="Xkx-hP-uFd">
-                                <rect key="frame" x="230" y="73" width="206" height="18"/>
+                                <rect key="frame" x="233" y="73" width="200" height="18"/>
                                 <buttonCell key="cell" type="check" title="Force Minimum Growths (5%)" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="2VQ-tW-vtF">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -103,8 +105,6 @@
                     <constraints>
                         <constraint firstAttribute="height" constant="176" id="yhn-FN-MuP"/>
                     </constraints>
-                    <color key="borderColor" white="0.0" alpha="0.41999999999999998" colorSpace="calibratedWhite"/>
-                    <color key="fillColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                 </box>
             </subviews>
             <constraints>

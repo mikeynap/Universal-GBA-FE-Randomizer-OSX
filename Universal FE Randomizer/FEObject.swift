@@ -26,6 +26,14 @@ struct GenericFEObject : FEObject {
     var objectID: UInt8
 }
 
+struct GenericFECharacterClass {
+    var characterName: String
+    var characterID: UInt8
+    
+    var classID : UInt8
+    var className: String
+}
+
 struct GenericFECharacter : FECharacter {
     var displayName: String
     var characterID: UInt8

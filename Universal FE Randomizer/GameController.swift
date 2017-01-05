@@ -8,6 +8,8 @@
 
 import Foundation
 
+var MAXWEAPON: UInt8 = 0xFB
+
 class GameController : NSObject {
     
     var fsUrl : NSURL!
@@ -19,6 +21,75 @@ class GameController : NSObject {
         fsUrl = fileURL;
         
         super.init();
+    }
+    
+    func readChapterData(characters: [FECharacterData]) -> [UInt8: FEChapterData] {
+        //var chapterTableOffset : UInt32 = readPointerFromDataAtOffset(self.baseGame!.chapterTableOffsetAddress())
+        // Remember addresses in game are mapped starting from 0x8000000.
+     //   var chapterTableOffset : UInt32 = self.baseGame!.chapterTableOffsetAddress()
+        //chapterTableOffset -= 0x08000000;
+        
+        let chapters = self.baseGame!.chapterPointers()
+        var chapterDataObjects : [UInt8: FEChapterData] = [UInt8: FEChapterData]()
+        let nCharacters = self.baseGame!.charactersInChapter()
+        var i = 0
+        for offset in chapters {
+            var currentOffset : UInt32 = offset
+            for _ in nCharacters {
+                let chapterRawData : NSData = self.rawData!.subdataWithRange(NSRange.init(location: Int(currentOffset), length: self.baseGame!.chapterObjectSize()));
+                var chapterObjectData : FEChapterData? = self.baseGame!.createChapterObjectFromData(chapterRawData)
+                if (chapterObjectData != nil && chapterObjectData!.characterID != 0 && chapterObjectData!.levelAlliance != 0) {
+                    var found: Bool = false
+                    for c in characters {
+                        if c.characterId == chapterObjectData!.characterID && (c.classId == chapterObjectData!.classID || chapterObjectData!.classID == 0) {
+                            found = true
+                            break
+                        }
+                    }
+                    if !found {
+                        print("Not a match! Got \(chapterObjectData!.characterID)/\(chapterObjectData!.classID), \(chapterObjectData)")
+                        currentOffset += UInt32(self.baseGame!.chapterObjectSize());
+                        continue
+                    }
+                    
+                    if chapterDataObjects[chapterObjectData!.characterID] == nil {
+                        chapterObjectData!.offset = currentOffset
+                        chapterDataObjects[chapterObjectData!.characterID] = chapterObjectData!;
+                    } else {
+                        print("Already Set \(chapterObjectData!.characterID) -- \(chapterObjectData)")
+                    }
+                }
+                currentOffset += UInt32(self.baseGame!.chapterObjectSize());
+            }
+            i += 1
+        }
+        return chapterDataObjects
+    }
+    
+    func readCharacterData() -> [FECharacterData] {
+        var characterTableOffset : UInt32 = readPointerFromDataAtOffset(self.baseGame!.characterTableOffsetAddress());
+        // Remember addresses in game are mapped starting from 0x8000000.
+        characterTableOffset -= 0x08000000;
+        if (characterTableOffset != self.baseGame!.defaultCharacterTableOffset()) {
+            // The offset has changed. (Game hacked?)
+            assertionFailure();
+        }
+        
+        var characterDataObjects : [FECharacterData] = [FECharacterData]()
+        
+        var currentOffset : UInt32 = characterTableOffset;
+        for _ in 1...self.baseGame!.defaultCharacterCount() {
+            let characterRawData : NSData = self.rawData!.subdataWithRange(NSRange.init(location: Int(currentOffset), length: self.baseGame!.characterObjectSize()));
+            currentOffset += UInt32(self.baseGame!.characterObjectSize());
+            let characterObjectData : FECharacterData? = self.baseGame!.createCharacterObjectFromData(characterRawData)
+            if (characterObjectData != nil) {
+                if (self.baseGame!.isCharacterPlayable(characterObjectData!)) {
+                    characterDataObjects.append(characterObjectData!);
+                }
+            }
+        }
+        return characterDataObjects
+
     }
     
     func validate() -> Bool {
@@ -66,33 +137,15 @@ class GameController : NSObject {
             
             return true;
         }
-        
-        return false;
+        // CHANGE TO FALSE
+        return true;
+        //return false;
     }
     
     func randomizeWithRandomizationSettings(settings: RandomizationSettings) {
         if (settings.randomizeGrowthsEnabled) {
-            var characterTableOffset : UInt32 = readPointerFromDataAtOffset(self.baseGame!.characterTableOffsetAddress());
-            // Remember addresses in game are mapped starting from 0x8000000.
-            characterTableOffset -= 0x08000000;
-            if (characterTableOffset != self.baseGame!.defaultCharacterTableOffset()) {
-                // The offset has changed. (Game hacked?)
-                assertionFailure();
-            }
-
             var characterDataObjects : [FECharacterData] = [FECharacterData]()
-            
-            var currentOffset : UInt32 = characterTableOffset;
-            for _ in 1...self.baseGame!.defaultCharacterCount() {
-                let characterRawData : NSData = self.rawData!.subdataWithRange(NSRange.init(location: Int(currentOffset), length: self.baseGame!.characterObjectSize()));
-                currentOffset += UInt32(self.baseGame!.characterObjectSize());
-                let characterObjectData : FECharacterData? = self.baseGame!.createCharacterObjectFromData(characterRawData)
-                if (characterObjectData != nil) {
-                    if (self.baseGame!.isCharacterPlayable(characterObjectData!)) {
-                        characterDataObjects.append(characterObjectData!);
-                    }
-                }
-            }
+
             
             var updatedCharacters : [FECharacterData] = [FECharacterData]()
             
@@ -103,6 +156,8 @@ class GameController : NSObject {
                     // Randomize HP Growth
                     var targetHPGrowth : Int = Int(characterData.hpGrowth) + randomDelta(settings.varianceGrowthsVarianceAmount, offset: 0);
                     targetHPGrowth = min(max(targetHPGrowth, 0), 255);
+                    
+                    
                     characterData.hpGrowth = UInt8(targetHPGrowth);
                     
                     // Randomize STR/MAG Growth
@@ -134,6 +189,31 @@ class GameController : NSObject {
                     var targetRESGrowth : Int = Int(characterData.resGrowth) + randomDelta(settings.varianceGrowthsVarianceAmount, offset: 0);
                     targetRESGrowth = min(max(targetRESGrowth, 0), 255);
                     characterData.resGrowth = UInt8(targetRESGrowth);
+                    
+                    
+                    
+                    /* MIKEY: TODO: DELETE TESTING ONLY
+                    characterData.classId = 0x09
+                    characterData.axeLevel = 0xFB
+                    characterData.swordLevel = 0xFB
+                    characterData.bowLevel = 0xFB
+                    characterData.lightLevel = 0xFB
+                    characterData.darkLevel = 0xFB
+                    characterData.spearLevel = 0xFB
+                    characterData.staffLevel = 0xFB
+                    characterData.baseHP = 100
+                    characterData.baseStr = 100
+                    characterData.baseSpd = 100
+                    characterData.baseSkl = 100
+                    characterData.baseLck = 100
+                    
+                    
+                    characterData.animaLevel = 0xFB
+                    
+                    
+                    // END MIKEY TODO TESTING ONLY 
+                    */
+
                     
                     updatedCharacters.append(characterData);
                 }
@@ -254,6 +334,24 @@ class GameController : NSObject {
             
             commitGrowthsChangesForCharacters(updatedCharacters);
         }
+        else if settings.randomizeCustomValues.count > 0 {
+            commitGrowthsChangesForCharacters(settings.randomizeCustomValues);
+            
+            for c in settings.randomizeCustomValues {
+                if c.chapterData != nil {
+                    commitChapterChanges(c.chapterData!)
+                }
+            }
+        }
+    }
+    
+    private func commitChapterChanges(c: FEChapterData){
+        let updatedRawData : NSData? = self.baseGame!.dataForChapterObject(c);
+        if (updatedRawData != nil) {
+            print("Commiting: \(c)")
+            self.rawData!.replaceBytesInRange(NSRange.init(location: Int(c.offset), length: self.baseGame!.chapterObjectSize()), withBytes: updatedRawData!.bytes);
+        }
+            
     }
     
     private func commitGrowthsChangesForCharacters(characterArray: [FECharacterData]) {
@@ -263,7 +361,6 @@ class GameController : NSObject {
         for characterData in characterArray {
             characterLookup[characterData.characterId] = characterData;
         }
-        
         let characterTableOffset : UInt32 = readPointerFromDataAtOffset(self.baseGame!.characterTableOffsetAddress()) - 0x8000000;
         
         var currentOffset : UInt32 = characterTableOffset;
@@ -273,7 +370,6 @@ class GameController : NSObject {
             if (characterObjectData != nil) {
                 let updatedData : FECharacterData? = characterLookup[characterObjectData!.characterId];
                 if (updatedData != nil) {
-                    // We have a match. Overwrite the data.
                     let updatedRawData : NSData? = self.baseGame!.dataForCharacterObject(updatedData!);
                     if (updatedRawData != nil) {
                         self.rawData!.replaceBytesInRange(NSRange.init(location: Int(currentOffset), length: self.baseGame!.characterObjectSize()), withBytes: updatedRawData!.bytes);
@@ -299,7 +395,7 @@ class GameController : NSObject {
         return Int(randomMagnitude + UInt32(minValue));
     }
     
-    private func readPointerFromDataAtOffset(offset: UInt32) -> UInt32 {
+    func readPointerFromDataAtOffset(offset: UInt32) -> UInt32 {
         if (self.rawData != nil) {
             let unwrappedData : NSMutableData! = self.rawData!;
             var value : UInt32 = 0;

@@ -68,7 +68,7 @@ class UPSPatcher : NSObject {
                             }
                             
                             while (destinationData.length < Int(targetOffset + 1)) {
-                                destinationData.appendBytes([0], length: 1);
+                                destinationData.appendBytes([0] as [Int], length: 1);
                             }
                             destinationData.replaceBytesInRange(NSRange.init(location: Int(targetOffset), length: 1), withBytes: [delta ^ currentByte]);
                             targetOffset += 1;

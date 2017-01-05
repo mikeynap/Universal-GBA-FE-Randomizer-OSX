@@ -19,6 +19,21 @@ enum FE6WeaponRank : UInt8 {
     
 }
 
+struct FE6Chapter: FEChapterData {
+    var rawData: NSData
+    var characterID: UInt8
+    var classID: UInt8
+    var item1ID: UInt8
+    var item2ID: UInt8
+    var item3ID: UInt8
+    var item4ID: UInt8
+    var levelAlliance: UInt8
+    
+    var offset: UInt32
+    
+    
+}
+
 struct FE6Character : FECharacterData {
     var rawData : NSData
     
@@ -71,6 +86,8 @@ struct FE6Character : FECharacterData {
     var ability4 : UInt8
     
     var supportDataPointer : UInt32
+    
+    var chapterData: FEChapterData?
 }
 
 class FE6: NSObject {
@@ -78,6 +95,52 @@ class FE6: NSObject {
 }
 
 extension FE6 : BaseGame {
+    
+    func charactersInChapter() -> [Int] {
+        return [28,46,57,56,59,92,66,105,78,70,67,82,94,85,66,36,94,79,44,64,71,49,64,56,58,90,61,82,65,64,55,96,126,69,115,63,53,27]
+    }
+    
+    func chapterPointers() -> [UInt32] {
+        let pArr: [UInt32] = [0x679B40,
+                              0x679DEC,
+                              0x67A2AC,
+                              0x67A70C,
+                              0x67AB48,
+                              0x67AFA0,
+                              0x67B680,
+                              0x67BB5C,
+                              0x68424C,
+                              0x67C3A4,
+                              0x67C898,
+                              0x681F5C,
+                              0x67CDAC,
+                              0x6825C4,
+                              0x67D538,
+                              0x684824,
+                              0x67DA14,
+                              0x67E13C,
+                              0x684A94,
+                              0x67E710,
+                              0x67EBA4,
+                              0x684D84,
+                              0x67F0E4,
+                              0x682C70,
+                              0x67F64C,
+                              0x6830B8,
+                              0x67FA58,
+                              0x6837F0,
+                              0x67FE94,
+                              0x683DA4,
+                              0x685100,
+                              0x6854A0,
+                              0x680324,
+                              0x685BC0,
+                              0x680C60,
+                              0x6814B0,
+                              0x6818F8,
+                              0x681D04]
+        return pArr
+    }
     
     static let playableCharacterArray : [FECharacter] = [ GenericFECharacter(displayName: "Roy", characterID: 0x01),
         GenericFECharacter(displayName: "Clarine", characterID: 0x02),
@@ -131,10 +194,10 @@ extension FE6 : BaseGame {
         GenericFECharacter(displayName: "Zealot", characterID: 0x3C),
         GenericFECharacter(displayName: "Echidna", characterID: 0x3D),
         GenericFECharacter(displayName: "Cecilia", characterID: 0x3F),
-        GenericFECharacter(displayName: "Geese", characterID: 0x40),
-        GenericFECharacter(displayName: "Eliwood", characterID: 0x43),
+        GenericFECharacter(displayName: "Geese", characterID: 0x40)
+ /*       GenericFECharacter(displayName: "Eliwood", characterID: 0x43),
         GenericFECharacter(displayName: "Guinevere", characterID: 0x44),
-        GenericFECharacter(displayName: "Hector", characterID: 0xCF)
+        GenericFECharacter(displayName: "Hector", characterID: 0xCF)*/
     ];
     
     static let standardCharacterArray : [FECharacter] = [ GenericFECharacter(displayName: "Clarine", characterID: 0x02),
@@ -185,10 +248,11 @@ extension FE6 : BaseGame {
         GenericFECharacter(displayName: "Zealot", characterID: 0x3C),
         GenericFECharacter(displayName: "Echidna", characterID: 0x3D),
         GenericFECharacter(displayName: "Cecilia", characterID: 0x3F),
-        GenericFECharacter(displayName: "Geese", characterID: 0x40),
+        GenericFECharacter(displayName: "Geese", characterID: 0x40)
+        /*
         GenericFECharacter(displayName: "Eliwood", characterID: 0x43),
         GenericFECharacter(displayName: "Guinevere", characterID: 0x44),
-        GenericFECharacter(displayName: "Hector", characterID: 0xCF)
+        GenericFECharacter(displayName: "Hector", characterID: 0xCF)*/
     ];
     
     static let lordCharacterArray : [FECharacter] = [ GenericFECharacter(displayName: "Roy", characterID: 0x01) ];
@@ -384,6 +448,15 @@ extension FE6 : BaseGame {
         return 0x6076A0;
     }
     
+    func chapterTableOffsetAddress() -> UInt32 {
+        return 0x679B40;
+    
+    }
+    
+    func chapterObjectSize() -> Int {
+        return 16;
+    }
+    
     func defaultCharacterCount() -> Int {
         return 220;
     }
@@ -459,6 +532,29 @@ extension FE6 : BaseGame {
     
     // Factory Methods
     
+    func createChapterObjectFromData(characterData: NSData) -> FEChapterData? {
+            var currentByte : UInt8 = 0;
+            var characterNumber : UInt8 = 0;
+            characterData.getBytes(&characterNumber, range: NSRange.init(location: 0, length: 1));
+        var classID : UInt8 = 0;
+        characterData.getBytes(&classID, range: NSRange.init(location: 1, length: 1));
+        var levelAlliance : UInt8 = 0;
+        characterData.getBytes(&levelAlliance, range: NSRange.init(location: 3, length: 1));
+            var item1ID : UInt8 = 0;
+            characterData.getBytes(&item1ID, range: NSRange.init(location: 8, length: 1));
+            var item2ID : UInt8 = 0;
+            characterData.getBytes(&item2ID, range: NSRange.init(location: 9, length: 1));
+            var item3ID : UInt8 = 0;
+            characterData.getBytes(&item3ID, range: NSRange.init(location: 10, length: 1));
+            var item4ID : UInt8 = 0;
+            characterData.getBytes(&item4ID, range: NSRange.init(location: 11, length: 1));
+        
+        let chapterObj : FE6Chapter = FE6Chapter.init(rawData: characterData, characterID: characterNumber, classID: classID, item1ID: item1ID, item2ID: item2ID, item3ID: item3ID, item4ID: item4ID, levelAlliance: levelAlliance, offset: 0);
+        
+            return chapterObj;
+        }
+
+
     func createCharacterObjectFromData(characterData: NSData) -> FECharacterData? {
         if (characterData.length == characterObjectSize()) {
             var namePointer : UInt16 = 0;
@@ -566,7 +662,7 @@ extension FE6 : BaseGame {
             characterData.getBytes(&currentByte, range: NSRange.init(location: 47, length: 1));
             supportsDataPointer = supportsDataPointer | (UInt32(currentByte) << 24);
             
-            let characterObject : FE6Character = FE6Character.init(rawData: characterData, characterAffinity: affinity, level: level, baseHP: baseHP, baseStr: baseSTR, baseSkl: baseSKL, baseSpd: baseSPD, baseDef: baseDEF, baseRes: baseRES, baseLck: baseLCK, baseCon: bonusCON, hpGrowth: hpGrowth, strGrowth: strGrowth, sklGrowth: sklGrowth, spdGrowth: spdGrowth, defGrowth: defGrowth, resGrowth: resGrowth, lckGrowth: lckGrowth, swordLevel: swordLevel, spearLevel: lanceLevel, axeLevel: axeLevel, bowLevel: bowLevel, staffLevel: staffLevel, animaLevel: animaLevel, lightLevel: lightLevel, darkLevel: darkLevel, nameIndex: namePointer, bioIndex: descriptionPointer, characterId: characterNumber, classId: classID, portraitIndex: portraitID, paletteIndex: unpromotedPalette, promotedPaletteIndex: promotedPalette, customUnpromotedSprite: 0, customPromotedSprite: 0, ability1: ability1, ability2: ability2, ability3: ability3, ability4: ability4, supportDataPointer: supportsDataPointer);
+            let characterObject : FE6Character = FE6Character.init(rawData: characterData, characterAffinity: affinity, level: level, baseHP: baseHP, baseStr: baseSTR, baseSkl: baseSKL, baseSpd: baseSPD, baseDef: baseDEF, baseRes: baseRES, baseLck: baseLCK, baseCon: bonusCON, hpGrowth: hpGrowth, strGrowth: strGrowth, sklGrowth: sklGrowth, spdGrowth: spdGrowth, defGrowth: defGrowth, resGrowth: resGrowth, lckGrowth: lckGrowth, swordLevel: swordLevel, spearLevel: lanceLevel, axeLevel: axeLevel, bowLevel: bowLevel, staffLevel: staffLevel, animaLevel: animaLevel, lightLevel: lightLevel, darkLevel: darkLevel, nameIndex: namePointer, bioIndex: descriptionPointer, characterId: characterNumber, classId: classID, portraitIndex: portraitID, paletteIndex: unpromotedPalette, promotedPaletteIndex: promotedPalette, customUnpromotedSprite: 0, customPromotedSprite: 0, ability1: ability1, ability2: ability2, ability3: ability3, ability4: ability4, supportDataPointer: supportsDataPointer, chapterData: nil);
             
             return characterObject;
         }
@@ -574,6 +670,36 @@ extension FE6 : BaseGame {
             return nil;
         }
     }
+    
+    func dataForChapterObject(chapterData: FEChapterData) -> NSData? {
+        let dataOutput : NSMutableData = NSMutableData.init(data: chapterData.rawData);
+        var currentByte : UInt8 = chapterData.characterID;
+        
+        dataOutput.replaceBytesInRange(NSRange.init(location: 0, length: 1), withBytes: &currentByte);
+
+        currentByte = chapterData.classID;
+        dataOutput.replaceBytesInRange(NSRange.init(location: 1, length: 1), withBytes: &currentByte);
+        
+        currentByte = chapterData.levelAlliance;
+        dataOutput.replaceBytesInRange(NSRange.init(location: 3, length: 1), withBytes: &currentByte);
+
+        currentByte = chapterData.item1ID;
+        dataOutput.replaceBytesInRange(NSRange.init(location: 8, length: 1), withBytes: &currentByte);
+
+        currentByte = chapterData.item2ID;
+        dataOutput.replaceBytesInRange(NSRange.init(location: 9, length: 1), withBytes: &currentByte);
+
+        currentByte = chapterData.item3ID;
+        dataOutput.replaceBytesInRange(NSRange.init(location: 10, length: 1), withBytes: &currentByte);
+
+        currentByte = chapterData.item4ID;
+        dataOutput.replaceBytesInRange(NSRange.init(location: 11, length: 1), withBytes: &currentByte);
+                
+        
+        return dataOutput.copy() as? NSData
+
+    }
+
     
     // Serialization Methods
     func dataForCharacterObject(characterData: FECharacterData) -> NSData? {

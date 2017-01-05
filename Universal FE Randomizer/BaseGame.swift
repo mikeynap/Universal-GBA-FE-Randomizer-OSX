@@ -24,7 +24,9 @@ protocol BaseGame : class {
     func isCharacterABoss(characterObject: FECharacterData) -> Bool
     
     func eligibleClasses() -> [FEClass]
-    
+    func chapterTableOffsetAddress() -> UInt32
+    func chapterObjectSize() -> Int
+    func createChapterObjectFromData(chapterData: NSData) -> FEChapterData?
     func standardCharacterList() -> [FECharacter]
     func lordCharacterList() -> [FECharacter]
     func thiefCharacterList() -> [FECharacter]
@@ -34,9 +36,32 @@ protocol BaseGame : class {
     func lordClassList() -> [FEClass]
     func thiefClassList() -> [FEClass]
     
+    func chapterPointers() -> [UInt32]
+    func charactersInChapter() -> [Int] 
     func characterLinksForCharacter(character: FECharacter) -> [FECharacter]
     
     func createCharacterObjectFromData(characterData: NSData) -> FECharacterData?
     func dataForCharacterObject(characterData: FECharacterData) -> NSData?
+    func dataForChapterObject(chapterData: FEChapterData) -> NSData?
+}
+
+extension BaseGame {
+    func nameFrom(id: UInt8) -> String {
+        for pcl in playableCharacterList() {
+            if id == pcl.characterID {
+                return pcl.displayName
+            }
+        }
+        return ""
+    }
     
+    func classNameFrom(id: UInt8) -> FEClass? {
+        for pcl in eligibleClasses() {
+            if id == pcl.classID {
+                return pcl
+            }
+        }
+        return nil
+    }
+
 }

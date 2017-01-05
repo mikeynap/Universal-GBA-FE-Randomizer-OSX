@@ -38,6 +38,14 @@ extension FE7 : BaseGame {
         return 0;
     }
     
+    func chapterTableOffsetAddress() -> UInt32 {
+        return 0;
+    }
+    
+    func chapterObjectSize() -> Int {
+        return 0;
+    }
+
     func characterObjectSize() -> Int {
         return 0;
     }
@@ -463,8 +471,23 @@ extension FE7 : BaseGame {
         return []
     }
     
+    func dataForChapterObject(chapterData: FEChapterData) -> NSData? {
+        return nil
+    }
+    
+    func chapterPointers() -> [UInt32] {
+        return []
+    }
+    
+    func charactersInChapter() -> [Int] {
+        return []
+    }
+    
     // Factory Methods
     func createCharacterObjectFromData(characterData: NSData) -> FECharacterData? {
+        return nil;
+    }
+    func createChapterObjectFromData(characterData: NSData) -> FEChapterData? {
         return nil;
     }
     

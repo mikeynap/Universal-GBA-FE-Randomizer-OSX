@@ -8,6 +8,20 @@
 
 import Foundation
 
+protocol FEChapterData {
+    var rawData: NSData{ get set }
+    var characterID: UInt8 {get set }
+    var classID: UInt8 {get set }
+    var item1ID: UInt8 {get set }
+    var item2ID: UInt8 {get set }
+    var item3ID: UInt8 {get set }
+    var item4ID: UInt8 {get set }
+    var levelAlliance: UInt8 {get set }
+    
+    var offset: UInt32 { get set }
+}
+
+
 protocol FECharacterData {
     var rawData : NSData {get set}
     
@@ -60,5 +74,7 @@ protocol FECharacterData {
     var ability4 : UInt8 { get set }
     
     var supportDataPointer : UInt32 { get set }
+    
+    var chapterData: FEChapterData? {get set}
     
 }

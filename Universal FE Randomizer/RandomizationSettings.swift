@@ -51,6 +51,11 @@ class RandomizationSettings : NSObject {
     var minimumAllowedGrowth: NSInteger = 0
     var maximumAllowedGrowth: NSInteger = 255
     
+    ///////////////
+    // Custom
+    ///////////////
+    var randomizeCustomEnabled: Bool = false
+    var randomizeCustomValues: [FECharacterData] = Array()
     
     ////////////////
     // Bases

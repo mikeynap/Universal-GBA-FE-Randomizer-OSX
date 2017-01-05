@@ -20,6 +20,7 @@ class GrowthsDetailViewController: NSViewController, DetailContentViewProtocol {
     @IBOutlet weak var redistributionButton: NSButton!
     @IBOutlet weak var fullButton: NSButton!
     
+    
     @IBOutlet weak var descriptionLabel: NSTextField!
     
     @IBOutlet weak var centerStepper: LabeledValueStepper!
@@ -71,6 +72,7 @@ class GrowthsDetailViewController: NSViewController, DetailContentViewProtocol {
     }
     
     @IBAction func onMinGrowthCheckboxChanged(sender: AnyObject) {
+    
         RandomizationSettings.sharedInstance.forceMinimumGrowths = (self.minimumGrowthsCheckbox.state == NSOnState)
     }
     

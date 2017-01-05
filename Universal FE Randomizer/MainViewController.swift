@@ -30,6 +30,8 @@ class MainViewController: NSViewController {
     
     var activeStatusWindow : NSWindow?
     var statusLabel : NSTextField?
+    var loaded: Bool = false
+    var customInfoViewController : CustomInfoViewController?
     
     var growthsDetailViewController : GrowthsDetailViewController?
     var basesDetailViewController : BasesDetailViewController?
@@ -50,6 +52,19 @@ class MainViewController: NSViewController {
             return growthsDetailViewController!.view
         }
     }
+    
+    var customContentView : NSView {
+        get {
+            if (customInfoViewController == nil) {
+                self.customInfoViewController = CustomInfoViewController()
+                self.customInfoViewController?.gameController = gameController
+                self.customInfoViewController?.delegate = self
+            }
+            
+            return customInfoViewController!.view
+        }
+    }
+
     
     var basesContentView : NSView {
         get {
@@ -124,7 +139,7 @@ class MainViewController: NSViewController {
         
         let panel: NSOpenPanel! = NSOpenPanel.init();
         
-        panel.beginSheetModalForWindow(self.view.window!, completionHandler: { (Int result) -> Void in
+        panel.beginSheetModalForWindow(self.view.window!, completionHandler: { result  in
             
             if (result == NSFileHandlingPanelOKButton) {
                 self.showStatusWithSpinner("Parsing file...");
@@ -175,11 +190,14 @@ class MainViewController: NSViewController {
     
     @IBAction func onRandomize(sender: AnyObject) {
         if (self.gameController != nil && self.gameController!.rawData != nil) {
+            if self.customInfoViewController != nil {
+                RandomizationSettings.sharedInstance.randomizeCustomValues = self.customInfoViewController!.getCharacterData()
+            }
             self.gameController!.randomizeWithRandomizationSettings(RandomizationSettings.sharedInstance);
             
             let savePanel : NSSavePanel = NSSavePanel.init();
             
-            savePanel.beginSheetModalForWindow(self.view.window!, completionHandler: { (Int result) -> Void in
+            savePanel.beginSheetModalForWindow(self.view.window!, completionHandler: { result in
                 if (result == NSFileHandlingPanelOKButton) {
                     let theDoc: NSURL! = savePanel.URL;
                     
@@ -219,6 +237,12 @@ class MainViewController: NSViewController {
             DetailContainer.hidden = !isEnabled
             self.tableView.reloadDataForRowIndexes(NSIndexSet.init(index: TopLevelRandomizationOptions.Bases.rawValue), columnIndexes: NSIndexSet.init(index: 0))
             self.tableView.noteHeightOfRowsWithIndexesChanged(NSIndexSet.init(index: TopLevelRandomizationOptions.Bases.rawValue))
+        }
+        else if (currentMode == TopLevelRandomizationOptions.Custom) {
+            RandomizationSettings.sharedInstance.randomizeCustomEnabled = isEnabled
+            DetailContainer.hidden = !isEnabled
+            self.tableView.reloadDataForRowIndexes(NSIndexSet.init(index: TopLevelRandomizationOptions.Custom.rawValue), columnIndexes: NSIndexSet.init(index: 0))
+            self.tableView.noteHeightOfRowsWithIndexesChanged(NSIndexSet.init(index: TopLevelRandomizationOptions.Custom.rawValue))
         }
         else if (currentMode == TopLevelRandomizationOptions.Constitution) {
             RandomizationSettings.sharedInstance.randomizeConstitutionEnabled = isEnabled
@@ -296,6 +320,8 @@ class MainViewController: NSViewController {
 }
 
 enum TopLevelRandomizationOptions : Int {
+    case Custom
+
     case Growths
     case Bases
     case Constitution
@@ -312,10 +338,10 @@ enum TopLevelRandomizationOptions : Int {
 extension MainViewController: NSTableViewDataSource {
     func numberOfRowsInTableView(tableView: NSTableView) -> Int {
         if (RandomizationSettings.sharedInstance.game == nil) {
-            return 0;
+            return 0 //TopLevelRandomizationOptions.Count.rawValue;
         }
         
-        return TopLevelRandomizationOptions.Count.rawValue
+        return 1 //TopLevelRandomizationOptions.Count.rawValue
     }
     
     func tableView(tableView: NSTableView, viewForTableColumn tableColumn: NSTableColumn?, row: Int) -> NSView? {
@@ -344,6 +370,18 @@ extension MainViewController: NSTableViewDataSource {
             cellView.titleLabel.stringValue = "Randomize Bases"
             if (RandomizationSettings.sharedInstance.randomizeBasesEnabled) {
                 cellView.detailLabel.stringValue = BasesDetailViewController.descriptionString()
+                cellView.detailLabel.font = NSFontManager.sharedFontManager().fontWithFamily("Helvetica", traits: NSFontTraitMask.UnitalicFontMask, weight: 0, size: 12)
+                cellView.detailLabel.textColor = NSColor.blackColor()
+            }
+            else {
+                cellView.detailLabel.stringValue = "\tDisabled"
+            }
+            cellView.needsLayout = true
+        }
+        else if (row == TopLevelRandomizationOptions.Custom.rawValue) {
+            cellView.titleLabel.stringValue = "Custom"
+            if (RandomizationSettings.sharedInstance.randomizeCustomEnabled) {
+                cellView.detailLabel.stringValue = CustomInfoViewController.descriptionString()
                 cellView.detailLabel.font = NSFontManager.sharedFontManager().fontWithFamily("Helvetica", traits: NSFontTraitMask.UnitalicFontMask, weight: 0, size: 12)
                 cellView.detailLabel.textColor = NSColor.blackColor()
             }
@@ -438,6 +476,17 @@ extension MainViewController: NSTableViewDataSource {
                 cellView.titleLabel.stringValue = "Randomize Growths"
                 if (RandomizationSettings.sharedInstance.randomizeGrowthsEnabled) {
                     cellView.detailLabel.stringValue = GrowthsDetailViewController.descriptionString()
+                    cellView.detailLabel.font = NSFontManager.sharedFontManager().fontWithFamily("Helvetica", traits: NSFontTraitMask.UnitalicFontMask, weight: 0, size: 12)
+                    cellView.detailLabel.textColor = NSColor.blackColor()
+                }
+                else {
+                    cellView.detailLabel.stringValue = "\tDisabled"
+                }
+            }
+            else if (row == TopLevelRandomizationOptions.Custom.rawValue) {
+                cellView.titleLabel.stringValue = "Custom"
+                if (RandomizationSettings.sharedInstance.randomizeCustomEnabled) {
+                    cellView.detailLabel.stringValue = CustomInfoViewController.descriptionString()
                     cellView.detailLabel.font = NSFontManager.sharedFontManager().fontWithFamily("Helvetica", traits: NSFontTraitMask.UnitalicFontMask, weight: 0, size: 12)
                     cellView.detailLabel.textColor = NSColor.blackColor()
                 }
@@ -546,6 +595,14 @@ extension MainViewController: NSTableViewDelegate {
             
             contentView = self.basesContentView
         }
+        else if (self.tableView.selectedRow == TopLevelRandomizationOptions.Custom.rawValue) {
+            self.currentMode = TopLevelRandomizationOptions.Custom
+            self.masterEnabledSwitch.state = RandomizationSettings.sharedInstance.randomizeCustomEnabled ? NSOnState : NSOffState
+            self.masterEnabledSwitch.enabled = true
+            self.DetailContainer.hidden = !RandomizationSettings.sharedInstance.randomizeCustomEnabled
+            
+            contentView = self.customContentView
+        }
         else if (self.tableView.selectedRow == TopLevelRandomizationOptions.Constitution.rawValue) {
             self.currentMode = TopLevelRandomizationOptions.Constitution
             self.masterEnabledSwitch.state = RandomizationSettings.sharedInstance.randomizeConstitutionEnabled ? NSOnState : NSOffState
@@ -614,6 +671,10 @@ extension MainViewController : DetailContentViewDelegate {
         else if (view === self.basesDetailViewController) {
             self.tableView.reloadDataForRowIndexes(NSIndexSet.init(index: TopLevelRandomizationOptions.Bases.rawValue), columnIndexes: NSIndexSet.init(index: 0))
             self.tableView.noteHeightOfRowsWithIndexesChanged(NSIndexSet.init(index: TopLevelRandomizationOptions.Bases.rawValue))
+        }
+        else if (view === self.customInfoViewController) {
+            self.tableView.reloadDataForRowIndexes(NSIndexSet.init(index: TopLevelRandomizationOptions.Custom.rawValue), columnIndexes: NSIndexSet.init(index: 0))
+            self.tableView.noteHeightOfRowsWithIndexesChanged(NSIndexSet.init(index: TopLevelRandomizationOptions.Custom.rawValue))
         }
         else if (view === self.constitutionDetailViewController) {
             self.tableView.reloadDataForRowIndexes(NSIndexSet.init(index: TopLevelRandomizationOptions.Constitution.rawValue), columnIndexes: NSIndexSet.init(index: 0))

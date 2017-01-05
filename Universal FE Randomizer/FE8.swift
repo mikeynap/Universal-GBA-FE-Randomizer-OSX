@@ -34,6 +34,15 @@ extension FE8 : BaseGame {
         return 0;
     }
     
+    func chapterTableOffsetAddress() -> UInt32 {
+        return 0;
+    }
+    
+    func chapterObjectSize() -> Int {
+        return 0;
+    }
+
+    
     func defaultCharacterCount() -> Int {
         return 0;
     }
@@ -483,7 +492,19 @@ extension FE8 : BaseGame {
      
         return nil;
     }
-    
+    func chapterPointers() -> [UInt32] {
+        return []
+    }
+    func charactersInChapter() -> [Int] {
+        return []
+    }
+
+    func createChapterObjectFromData(characterData: NSData) -> FEChapterData? {
+        return nil;
+    }
+    func dataForChapterObject(chapterData: FEChapterData) -> NSData? {
+        return nil
+    }
     // Serialization Methods
     
     func dataForCharacterObject(characterData: FECharacterData) -> NSData? {
