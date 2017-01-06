@@ -19,6 +19,7 @@ protocol FEChapterData {
     var levelAlliance: UInt8 {get set }
     
     var offset: UInt32 { get set }
+    var modified: Bool { get set}
 }
 
 
@@ -75,6 +76,6 @@ protocol FECharacterData {
     
     var supportDataPointer : UInt32 { get set }
     
-    var chapterData: FEChapterData? {get set}
+    var chapterData: [FEChapterData] {get set}
     
 }

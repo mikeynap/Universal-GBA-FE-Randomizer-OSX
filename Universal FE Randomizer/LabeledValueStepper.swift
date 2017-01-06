@@ -138,7 +138,7 @@ class LabeledValueStepper : NSView {
         valueField.translatesAutoresizingMaskIntoConstraints = false
         self.addSubview(valueField)
         
-        stepper.action = Selector("onStepper:")
+        stepper.action = #selector(LabeledValueStepper.onStepper(_:))
         stepper.target = self
         stepper.valueWraps = false
         stepper.minValue = Double(self.minValue)

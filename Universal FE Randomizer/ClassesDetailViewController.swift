@@ -92,14 +92,14 @@ class ClassesDetailViewController: NSViewController, DetailContentViewProtocol {
         
         randomEnemyCheckbox.state = RandomizationSettings.sharedInstance.advancedRandomizeRegularEnemies ? NSOnState : NSOffState
         
-        bossTableView.setDelegate(self)
-        bossTableView.setDataSource(self)
+        bossTableView.delegate = self
+        bossTableView.dataSource = self
         
-        playableCharacterTableView.setDelegate(self)
-        playableCharacterTableView.setDataSource(self)
+        playableCharacterTableView.delegate = self
+        playableCharacterTableView.dataSource = self
         
-        classPoolTableView.setDelegate(self)
-        classPoolTableView.setDataSource(self)
+        classPoolTableView.delegate = self
+        classPoolTableView.dataSource = self
         
         game = RandomizationSettings.sharedInstance.game
     }

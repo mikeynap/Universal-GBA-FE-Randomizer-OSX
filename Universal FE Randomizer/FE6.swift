@@ -31,6 +31,8 @@ struct FE6Chapter: FEChapterData {
     
     var offset: UInt32
     
+    var modified: Bool =  false
+    
     
 }
 
@@ -87,7 +89,7 @@ struct FE6Character : FECharacterData {
     
     var supportDataPointer : UInt32
     
-    var chapterData: FEChapterData?
+    var chapterData: [FEChapterData]
 }
 
 class FE6: NSObject {
@@ -549,7 +551,7 @@ extension FE6 : BaseGame {
             var item4ID : UInt8 = 0;
             characterData.getBytes(&item4ID, range: NSRange.init(location: 11, length: 1));
         
-        let chapterObj : FE6Chapter = FE6Chapter.init(rawData: characterData, characterID: characterNumber, classID: classID, item1ID: item1ID, item2ID: item2ID, item3ID: item3ID, item4ID: item4ID, levelAlliance: levelAlliance, offset: 0);
+        let chapterObj : FE6Chapter = FE6Chapter.init(rawData: characterData, characterID: characterNumber, classID: classID, item1ID: item1ID, item2ID: item2ID, item3ID: item3ID, item4ID: item4ID, levelAlliance: levelAlliance, offset: 0, modified: false);
         
             return chapterObj;
         }
@@ -662,7 +664,7 @@ extension FE6 : BaseGame {
             characterData.getBytes(&currentByte, range: NSRange.init(location: 47, length: 1));
             supportsDataPointer = supportsDataPointer | (UInt32(currentByte) << 24);
             
-            let characterObject : FE6Character = FE6Character.init(rawData: characterData, characterAffinity: affinity, level: level, baseHP: baseHP, baseStr: baseSTR, baseSkl: baseSKL, baseSpd: baseSPD, baseDef: baseDEF, baseRes: baseRES, baseLck: baseLCK, baseCon: bonusCON, hpGrowth: hpGrowth, strGrowth: strGrowth, sklGrowth: sklGrowth, spdGrowth: spdGrowth, defGrowth: defGrowth, resGrowth: resGrowth, lckGrowth: lckGrowth, swordLevel: swordLevel, spearLevel: lanceLevel, axeLevel: axeLevel, bowLevel: bowLevel, staffLevel: staffLevel, animaLevel: animaLevel, lightLevel: lightLevel, darkLevel: darkLevel, nameIndex: namePointer, bioIndex: descriptionPointer, characterId: characterNumber, classId: classID, portraitIndex: portraitID, paletteIndex: unpromotedPalette, promotedPaletteIndex: promotedPalette, customUnpromotedSprite: 0, customPromotedSprite: 0, ability1: ability1, ability2: ability2, ability3: ability3, ability4: ability4, supportDataPointer: supportsDataPointer, chapterData: nil);
+            let characterObject : FE6Character = FE6Character.init(rawData: characterData, characterAffinity: affinity, level: level, baseHP: baseHP, baseStr: baseSTR, baseSkl: baseSKL, baseSpd: baseSPD, baseDef: baseDEF, baseRes: baseRES, baseLck: baseLCK, baseCon: bonusCON, hpGrowth: hpGrowth, strGrowth: strGrowth, sklGrowth: sklGrowth, spdGrowth: spdGrowth, defGrowth: defGrowth, resGrowth: resGrowth, lckGrowth: lckGrowth, swordLevel: swordLevel, spearLevel: lanceLevel, axeLevel: axeLevel, bowLevel: bowLevel, staffLevel: staffLevel, animaLevel: animaLevel, lightLevel: lightLevel, darkLevel: darkLevel, nameIndex: namePointer, bioIndex: descriptionPointer, characterId: characterNumber, classId: classID, portraitIndex: portraitID, paletteIndex: unpromotedPalette, promotedPaletteIndex: promotedPalette, customUnpromotedSprite: 0, customPromotedSprite: 0, ability1: ability1, ability2: ability2, ability3: ability3, ability4: ability4, supportDataPointer: supportsDataPointer, chapterData: []);
             
             return characterObject;
         }

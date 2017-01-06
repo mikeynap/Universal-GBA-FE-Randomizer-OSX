@@ -23,41 +23,43 @@ class GameController : NSObject {
         super.init();
     }
     
-    func readChapterData(characters: [FECharacterData]) -> [UInt8: FEChapterData] {
+    func readChapterData(characters: [FECharacterData]) -> [UInt8: [FEChapterData]] {
         //var chapterTableOffset : UInt32 = readPointerFromDataAtOffset(self.baseGame!.chapterTableOffsetAddress())
         // Remember addresses in game are mapped starting from 0x8000000.
      //   var chapterTableOffset : UInt32 = self.baseGame!.chapterTableOffsetAddress()
         //chapterTableOffset -= 0x08000000;
         
         let chapters = self.baseGame!.chapterPointers()
-        var chapterDataObjects : [UInt8: FEChapterData] = [UInt8: FEChapterData]()
+        var chapterDataObjects : [UInt8: [FEChapterData]] = [UInt8: [FEChapterData]]()
         let nCharacters = self.baseGame!.charactersInChapter()
         var i = 0
         for offset in chapters {
             var currentOffset : UInt32 = offset
-            for _ in nCharacters {
+            for _ in (0..<nCharacters[i]) {
+                print("Chapter \(i), nCharacters: \(nCharacters[i])")
                 let chapterRawData : NSData = self.rawData!.subdataWithRange(NSRange.init(location: Int(currentOffset), length: self.baseGame!.chapterObjectSize()));
                 var chapterObjectData : FEChapterData? = self.baseGame!.createChapterObjectFromData(chapterRawData)
-                if (chapterObjectData != nil && chapterObjectData!.characterID != 0 && chapterObjectData!.levelAlliance != 0) {
+                if (chapterObjectData != nil && chapterObjectData!.characterID != 0) {
                     var found: Bool = false
                     for c in characters {
-                        if c.characterId == chapterObjectData!.characterID && (c.classId == chapterObjectData!.classID || chapterObjectData!.classID == 0) {
+                        if c.characterId == chapterObjectData!.characterID  {
                             found = true
                             break
                         }
                     }
+                    
+                    print("CID: \(chapterObjectData?.characterID), ClassID: \(chapterObjectData?.classID)")
                     if !found {
-                        print("Not a match! Got \(chapterObjectData!.characterID)/\(chapterObjectData!.classID), \(chapterObjectData)")
+   //                     print("Not a match! Got \(chapterObjectData!.characterID)/\(chapterObjectData!.classID), \(chapterObjectData)")
                         currentOffset += UInt32(self.baseGame!.chapterObjectSize());
                         continue
                     }
                     
+                    chapterObjectData!.offset = currentOffset
                     if chapterDataObjects[chapterObjectData!.characterID] == nil {
-                        chapterObjectData!.offset = currentOffset
-                        chapterDataObjects[chapterObjectData!.characterID] = chapterObjectData!;
-                    } else {
-                        print("Already Set \(chapterObjectData!.characterID) -- \(chapterObjectData)")
+                        chapterDataObjects[chapterObjectData!.characterID] = []
                     }
+                    chapterDataObjects[chapterObjectData!.characterID]!.append(chapterObjectData!);
                 }
                 currentOffset += UInt32(self.baseGame!.chapterObjectSize());
             }
@@ -338,8 +340,10 @@ class GameController : NSObject {
             commitGrowthsChangesForCharacters(settings.randomizeCustomValues);
             
             for c in settings.randomizeCustomValues {
-                if c.chapterData != nil {
-                    commitChapterChanges(c.chapterData!)
+                for cd in  c.chapterData {
+                    if cd.modified {
+                        commitChapterChanges(cd)
+                    }
                 }
             }
         }
@@ -350,6 +354,8 @@ class GameController : NSObject {
         if (updatedRawData != nil) {
             print("Commiting: \(c)")
             self.rawData!.replaceBytesInRange(NSRange.init(location: Int(c.offset), length: self.baseGame!.chapterObjectSize()), withBytes: updatedRawData!.bytes);
+        } else {
+            print("Wait why am i nil???")
         }
             
     }

@@ -365,6 +365,7 @@
 				OTHER_LDFLAGS = "-lz";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.otakureborn.Universal-FE-Randomizer";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
 				SWIFT_OBJC_BRIDGING_HEADER = "Universal FE Randomizer/Universal FE Randomizer-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -381,6 +382,7 @@
 				OTHER_LDFLAGS = "-lz";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.otakureborn.Universal-FE-Randomizer";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
 				SWIFT_OBJC_BRIDGING_HEADER = "Universal FE Randomizer/Universal FE Randomizer-Bridging-Header.h";
 			};
 			name = Release;

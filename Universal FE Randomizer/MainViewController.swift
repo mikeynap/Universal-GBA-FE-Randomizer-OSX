@@ -145,7 +145,7 @@ class MainViewController: NSViewController {
                 self.showStatusWithSpinner("Parsing file...");
                 
                 let theDoc: NSURL! = panel.URLs[0];
-                self.fileTextField.stringValue = theDoc.absoluteString
+                self.fileTextField.stringValue = theDoc.absoluteString!
                
                 dispatch_async(dispatch_get_main_queue(), { () -> Void in
                     self.gameController = GameController(fileURL: theDoc);
@@ -163,7 +163,7 @@ class MainViewController: NSViewController {
                         let alert: NSAlert = NSAlert.init();
                         alert.messageText = "Incorrect CRC32 Checksum";
                         alert.informativeText = "This game may have been modified. The data may have been relocated and the randomizer may not work properly.";
-                        alert.alertStyle = NSAlertStyle.WarningAlertStyle;
+                        alert.alertStyle = NSAlertStyle.Warning;
                         
                         alert.beginSheetModalForWindow(self.view.window!, completionHandler: nil);
                         
@@ -207,7 +207,7 @@ class MainViewController: NSViewController {
                         let alert: NSAlert = NSAlert.init();
                         alert.messageText = "Success!";
                         alert.informativeText = "Successfully randomized " + self.gameController!.baseGame!.gameTitle() + "!";
-                        alert.alertStyle = NSAlertStyle.InformationalAlertStyle;
+                        alert.alertStyle = NSAlertStyle.Informational;
                         
                         alert.beginSheetModalForWindow(self.view.window!, completionHandler: nil);
                     }
@@ -215,7 +215,7 @@ class MainViewController: NSViewController {
                         let alert: NSAlert = NSAlert.init();
                         alert.messageText = "Randomization failed!";
                         alert.informativeText = "There was a problem randomizing the game.";
-                        alert.alertStyle = NSAlertStyle.CriticalAlertStyle;
+                        alert.alertStyle = NSAlertStyle.Critical;
                         
                         alert.beginSheetModalForWindow(self.view.window!, completionHandler: nil);
                     }
@@ -281,7 +281,7 @@ class MainViewController: NSViewController {
         
             let spinner : NSProgressIndicator = NSProgressIndicator.init(frame: NSZeroRect);
             spinner.style = NSProgressIndicatorStyle.SpinningStyle;
-            spinner.controlSize = NSControlSize.RegularControlSize;
+            spinner.controlSize = NSControlSize.Regular;
             spinner.sizeToFit();
             spinner.startAnimation(nil);
             

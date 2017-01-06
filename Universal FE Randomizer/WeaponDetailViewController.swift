@@ -148,8 +148,8 @@ class WeaponDetailViewController: NSViewController, DetailContentViewProtocol {
         weightMinimumField.hidden = true
         weightMaximumField.hidden = true
         
-        effectsList.setDelegate(self)
-        effectsList.setDataSource(self)
+        effectsList.delegate = self
+        effectsList.dataSource = self
         
         effectsEnableButton.state = RandomizationSettings.sharedInstance.addRandomWeaponEffects ? NSOnState : NSOffState
         effectsList.hidden = !RandomizationSettings.sharedInstance.addRandomWeaponEffects

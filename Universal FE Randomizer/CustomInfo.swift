@@ -157,12 +157,18 @@ class CustomInfoViewController: NSViewController, DetailContentViewProtocol {
         for c in characterD {
             var m = false
             for ch in characters {
-                if ch.characterID == c.characterId {
+                if ch.characterID == c.characterId  {
                     print("ID: \(ch.characterID), Name: \(ch.characterName) \(c.nameIndex)")
                     characterData[ch.characterName] = c
-                    characterData[ch.characterName]?.chapterData = chapterData[ch.characterID]
+                    if chapterData[ch.characterID] != nil {
+                        for chapt in chapterData[ch.characterID]! {
+                            print("Adding Chapter data for \(ch.characterName)")
+                            characterData[ch.characterName]?.chapterData.append(chapt)
+                        }
+                    } else {
+                        print("No chapter data for \(ch.characterName)...")
+                    }
                     m = true
-                    print("Chapter Data \(chapterData[ch.characterID]) for \(ch.characterName)")
                 }
             }
             if m == false {
@@ -255,27 +261,27 @@ class CustomInfoViewController: NSViewController, DetailContentViewProtocol {
             characterData[name]!.staffLevel = 0xFB
             characterData[name]!.animaLevel = 0xFB
         }
-        
-        let item4: UInt8 = UInt8(baseStats[cls]![baseStats[cls]!.count - 1])
-        if characterData[name]!.chapterData != nil {
-            characterData[name]!.chapterData?.classID = classNameMap[cls]!
-            print("Editing Chapter Data for \(name), \(characterData[name]!.chapterData) ")
-            if characterData[name]!.chapterData?.item2ID == 0 {
-                print("Item2 Empty")
-                characterData[name]!.chapterData?.item2ID = item4
 
-            } else if characterData[name]!.chapterData?.item3ID == 0 {
+        let item4: UInt8 = UInt8(baseStats[cls]![baseStats[cls]!.count - 1])
+        print(characterData[name]!.chapterData)
+        for cd in 0..<characterData[name]!.chapterData.count {
+            characterData[name]!.chapterData[cd].classID = classNameMap[cls]!
+            characterData[name]!.chapterData[cd].modified = true
+            print("Editing Chapter Data for \(name), \(characterData[name]!.chapterData) ")
+            if characterData[name]!.chapterData[cd].item2ID == 0 {
+                print("Item2 Empty")
+                characterData[name]!.chapterData[cd].item2ID = item4
+                
+            } else if characterData[name]!.chapterData[cd].item3ID == 0 {
                 print("Item 3 Empty")
-                characterData[name]!.chapterData?.item3ID = item4
-            
+                characterData[name]!.chapterData[cd].item3ID = item4
+                
             } else {
                 print("Item 4 is where it's at.")
-                characterData[name]!.chapterData?.item4ID = item4
+                characterData[name]!.chapterData[cd].item4ID = item4
             }
-        } else {
-            print("Cannot change class of \(name)")
+
         }
-        print(characterData[name]!.chapterData)
         
         browserView.reloadColumn(2)
         
